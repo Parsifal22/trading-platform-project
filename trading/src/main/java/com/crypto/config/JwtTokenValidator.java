@@ -1,7 +1,6 @@
 package com.crypto.config;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.crypto.SecretKey;
@@ -44,7 +43,7 @@ public class JwtTokenValidator extends OncePerRequestFilter {
 
                 Authentication auth = new UsernamePasswordAuthenticationToken(
                     email, 
-                    authoritiesList, 
+                    null, 
                     authoritiesList
                     );
                 
