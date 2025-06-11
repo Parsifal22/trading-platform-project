@@ -34,4 +34,4 @@ build/
 .vscode/
 
 
-/workspaces/trading-platform-project/trading/src/main/resources/application.properties
+trading/src/main/resources/application.properties
