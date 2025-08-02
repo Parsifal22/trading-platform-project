@@ -8,10 +8,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crypto.modal.Order;
+import com.crypto.modal.PaymentOrder;
 import com.crypto.modal.User;
 import com.crypto.modal.Wallet;
 import com.crypto.modal.WalletTransaction;
+import com.crypto.response.PaymentResponse;
 import com.crypto.service.OrderService;
+import com.crypto.service.PaymentService;
 import com.crypto.service.UserService;
 import com.crypto.service.WalletService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +37,9 @@ public class WalletController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private PaymentService paymentService;
     
     @GetMapping("/api/wallet")
     public ResponseEntity<Wallet> getUserWallet(@RequestHeader("Authorization") String jwt) throws Exception{
@@ -59,9 +65,31 @@ public class WalletController {
         return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
     }
 
-    @PutMapping("/api/wallet/{orderId}/pay")
-    public ResponseEntity<Wallet> payOrderPayment(
+    @PutMapping("/api/wallet/deposit")
+    public ResponseEntity<Wallet> addBalanceToWallet(
         @RequestHeader("Authorization") String jwt, 
+        @RequestParam(name = "order_id") Long orderId,
+        @RequestParam(name = "payment_id") String paymentId
+    ) throws Exception{
+        User user = userService.findUserProfileByJwt(jwt);
+        
+
+        Wallet wallet = walletService.getUserWallet(user);
+
+        PaymentOrder order = paymentService.getPaymentOrderById(orderId);
+
+        Boolean status = paymentService.proccedPaymentOrder(order, paymentId);
+
+        if(status){
+            wallet = walletService.addBalance(wallet, order.getAmount());
+        }
+
+        return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
+    }
+
+    @PutMapping("/api/wallet/order/{orderId}/pay")
+    public ResponseEntity<Wallet> payOrderPayment(
+        @RequestHeader("Authorization") String jwt,
         @PathVariable Long orderId
     ) throws Exception{
         User user = userService.findUserProfileByJwt(jwt);
