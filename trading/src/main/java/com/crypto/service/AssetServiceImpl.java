@@ -3,12 +3,14 @@ package com.crypto.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.crypto.modal.Asset;
 import com.crypto.modal.Coin;
 import com.crypto.modal.User;
 import com.crypto.repository.AssetRepository;
 
+@Service
 public class AssetServiceImpl implements AssetService {
 
     @Autowired

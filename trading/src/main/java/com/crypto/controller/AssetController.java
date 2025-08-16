@@ -29,7 +29,7 @@ public class AssetController {
     @GetMapping("/{assetId}")
     public ResponseEntity<Asset> getAssetById(
         @PathVariable Long assetId
-    ){
+    ) throws Exception{
 
         Asset asset = assetService.getAssetById(assetId);
         return ResponseEntity.ok().body(asset);
@@ -60,3 +60,4 @@ public class AssetController {
 
         return ResponseEntity.ok().body(assets);
     }
+}

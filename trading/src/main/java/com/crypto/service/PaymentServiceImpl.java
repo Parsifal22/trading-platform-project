@@ -3,6 +3,7 @@ package com.crypto.service;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.crypto.domain.PaymentMethod;
 import com.crypto.domain.PaymentOrderStatus;
@@ -19,6 +20,7 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 
+@Service
 public class PaymentServiceImpl implements PaymentService{
 
     @Autowired
@@ -40,6 +42,7 @@ public class PaymentServiceImpl implements PaymentService{
         paymentOrder.setUser(user);
         paymentOrder.setAmount(amount);
         paymentOrder.setPaymentMethod(paymentMethod);
+        paymentOrder.setStatus(PaymentOrderStatus.PENDING);
 
         return paymentOrderRepository.save(paymentOrder);
  }
@@ -51,6 +54,10 @@ public class PaymentServiceImpl implements PaymentService{
 
     @Override
     public Boolean proccedPaymentOrder(PaymentOrder paymentOrder, String paymentId) throws Exception {
+
+        if(paymentOrder.getStatus()==null){
+            paymentOrder.setStatus(PaymentOrderStatus.PENDING);
+        }
         if(paymentOrder.getStatus().equals(PaymentOrderStatus.PENDING)){
             if(paymentOrder.getPaymentMethod().equals(PaymentMethod.RAZORPAY)){
                 RazorpayClient razorpay = new RazorpayClient(apiKey, apiSecretKey);
@@ -78,7 +85,7 @@ public class PaymentServiceImpl implements PaymentService{
     }
 
     @Override
-    public PaymentResponse createRazorpayPaymentLink(User user, Long amount) throws RazorpayException {
+    public PaymentResponse createRazorpayPaymentLink(User user, Long amount, Long orderId) throws RazorpayException {
 
          Long Amount = amount*100;
 
@@ -101,7 +108,7 @@ public class PaymentServiceImpl implements PaymentService{
 
             paymentLinkRequest.put("reminder_enable", true);
 
-            paymentLinkRequest.put("callback_url", "http://localhost:5173/wallet");
+            paymentLinkRequest.put("callback_url", "http://localhost:5173/wallet?order_id=" + orderId);
             paymentLinkRequest.put("callback_method", "get");
 
             PaymentLink payment = razorpay.paymentLink.create(paymentLinkRequest);
@@ -127,7 +134,7 @@ public class PaymentServiceImpl implements PaymentService{
             SessionCreateParams params = SessionCreateParams.builder()
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl("http://localhost:5173/wallet"+orderId)
+                .setSuccessUrl("http://localhost:5173/wallet?orderId="+orderId)
                 .setCancelUrl("http://localhost:5173/payment/cancel")
                 .addLineItem(SessionCreateParams.LineItem.builder()
                     .setQuantity(1L)

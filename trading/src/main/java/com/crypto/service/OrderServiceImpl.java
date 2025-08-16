@@ -154,7 +154,7 @@ public class OrderServiceImpl implements OrderService{
     @Transactional
     public Order processOrder(Coin coin, double quantity, OrderType orderType, User user) throws Exception {
 
-        if(orderType.equals(OrderType.SELL)){
+        if(orderType.equals(OrderType.BUY)){
             return buyAsset(coin, quantity, user);
         }
         else if(orderType.equals(OrderType.SELL)){

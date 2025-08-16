@@ -23,6 +23,7 @@ import com.crypto.response.AuthResponse;
 import com.crypto.service.CustomUserDetailsService;
 import com.crypto.service.EmailService;
 import com.crypto.service.TwoFactorOtpService;
+import com.crypto.service.WatchlistService;
 import com.crypto.utils.OtpUtils;
 
 @RestController
@@ -37,6 +38,9 @@ public class AuthController {
 
     @Autowired
     private TwoFactorOtpService twoFactorOtpService;
+
+    @Autowired
+    private WatchlistService watchlistService;
 
     @Autowired
     private EmailService emailService;
@@ -57,6 +61,8 @@ public class AuthController {
         newUser.setFullName(user.getFullName());
 
         User savedUser = userRepository.save(newUser);
+
+        watchlistService.createWatchList(savedUser);
 
         Authentication auth = new UsernamePasswordAuthenticationToken(
             user.getEmail(), 

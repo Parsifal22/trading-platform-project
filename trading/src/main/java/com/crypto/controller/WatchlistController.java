@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
@@ -24,10 +23,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class WatchlistController {
 
     @Autowired
-    private final WatchlistService watchlistService;
+    private WatchlistService watchlistService;
 
     @Autowired
-    private final UserService userService;
+    private UserService userService;
 
     @Autowired
     private CoinService coinService;

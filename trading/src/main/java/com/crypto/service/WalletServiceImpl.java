@@ -25,6 +25,7 @@ public class WalletServiceImpl implements WalletService {
         if(wallet==null){
             wallet = new Wallet();
             wallet.setUser(user);
+            walletRepository.save(wallet);
         }
         return wallet;
     }
@@ -50,7 +51,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public Wallet wallettoWalletTransfer(User sender, Wallet receiverWallet, Long amount) throws Exception {
+    public Wallet walletToWalletTransfer(User sender, Wallet receiverWallet, Long amount) throws Exception {
         Wallet senderWallet = getUserWallet(sender);
 
         if(senderWallet.getBalance().compareTo(BigDecimal.valueOf(amount))<0){

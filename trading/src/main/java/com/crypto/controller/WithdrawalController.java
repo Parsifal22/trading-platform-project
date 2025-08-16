@@ -2,17 +2,17 @@ package com.crypto.controller;
 
 import java.util.List;
 
-import org.apache.coyote.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crypto.domain.WalletTransactionType;
 import com.crypto.modal.User;
 import com.crypto.modal.Wallet;
 import com.crypto.modal.WalletTransaction;
 import com.crypto.modal.Withdrawal;
-import com.crypto.repository.UserRepository;
+import com.crypto.service.TransactionService;
 import com.crypto.service.UserService;
 import com.crypto.service.WalletService;
 import com.crypto.service.WithdrawalService;
@@ -20,11 +20,8 @@ import com.crypto.service.WithdrawalService;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 
 
 @RestController
@@ -38,6 +35,9 @@ public class WithdrawalController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TransactionService transactionService;
 
     // @Autowired
     // private WalletTransactionService WalletTransactionService;
@@ -53,6 +53,12 @@ public class WithdrawalController {
 
         Withdrawal withdrawal = withdrawalService.requestWithdrawal(amount, user);
         walletService.addBalance(userWallet, -withdrawal.getAmount());
+
+        WalletTransaction walletTransaction = transactionService.createTransaction(userWallet, 
+            WalletTransactionType.WITHDRAWAL, 
+            null, 
+            "Bank Account Withdrawal", 
+            withdrawal.getAmount());
 
         return new ResponseEntity<>(withdrawal, HttpStatus.OK);
         
@@ -71,7 +77,7 @@ public class WithdrawalController {
             Wallet userWallet = walletService.getUserWallet(user);
 
             if(!accept){
-                walletService.addBalance(userWallet, withdrawal.getAmount())
+                walletService.addBalance(userWallet, withdrawal.getAmount());
             }
 
             return new ResponseEntity<>(withdrawal, HttpStatus.OK);

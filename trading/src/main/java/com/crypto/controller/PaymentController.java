@@ -17,12 +17,10 @@ import com.stripe.exception.StripeException;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 
 @RestController
-@RequestMapping("/api")
 public class PaymentController {
 
     @Autowired
@@ -31,7 +29,7 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
-    @PostMapping("/api/payment/{paymentMathod}/amount/{amount}")
+    @PostMapping("/api/payment/{paymentMethod}/amount/{amount}")
     public ResponseEntity<PaymentResponse> paymentHandler(
         @RequestHeader("Authorization") String jwt,
         @PathVariable Long amount,
@@ -44,7 +42,7 @@ public class PaymentController {
         PaymentOrder order = paymentService.createOrder(user, amount, paymentMethod);
 
         if(paymentMethod.equals(PaymentMethod.RAZORPAY)){
-            paymentResponse=paymentService.createRazorpayPaymentLink(user, amount);
+            paymentResponse=paymentService.createRazorpayPaymentLink(user, amount, order.getId());
         } 
         else {
             paymentResponse = paymentService.createStripePaymentLink(user, amount, order.getId());

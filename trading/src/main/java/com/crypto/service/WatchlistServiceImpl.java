@@ -11,7 +11,7 @@ import com.crypto.modal.Watchlist;
 import com.crypto.repository.WatchlistRepository;
 
 @Service
-public class WqatchlistServiceImpl implements WatchlistService{
+public class WatchlistServiceImpl implements WatchlistService{
 
     @Autowired
     private WatchlistRepository watchlistRepository;
@@ -55,8 +55,11 @@ public class WqatchlistServiceImpl implements WatchlistService{
         if (watchlist.getCoins().contains(coin)){
             watchlist.getCoins().remove(coin);
         } else {
-            watchlistRepository.save(watchlist);
-            return coin;
+            watchlist.getCoins().add(coin);
         }
+        
+        watchlistRepository.save(watchlist);
+        return coin;
+        
     }
 }

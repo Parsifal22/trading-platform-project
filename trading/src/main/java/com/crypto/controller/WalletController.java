@@ -1,5 +1,7 @@
 package com.crypto.controller;
 
+import java.math.BigDecimal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crypto.domain.WalletTransactionType;
 import com.crypto.modal.Order;
 import com.crypto.modal.PaymentOrder;
 import com.crypto.modal.User;
@@ -15,6 +18,7 @@ import com.crypto.modal.WalletTransaction;
 import com.crypto.response.PaymentResponse;
 import com.crypto.service.OrderService;
 import com.crypto.service.PaymentService;
+import com.crypto.service.TransactionService;
 import com.crypto.service.UserService;
 import com.crypto.service.WalletService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +30,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 
 @RestController
-@RequestMapping("/api/wallet")
 public class WalletController {
 
     @Autowired
@@ -40,6 +43,9 @@ public class WalletController {
 
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private TransactionService transactionService;
     
     @GetMapping("/api/wallet")
     public ResponseEntity<Wallet> getUserWallet(@RequestHeader("Authorization") String jwt) throws Exception{
@@ -58,9 +64,15 @@ public class WalletController {
         User senderUser = userService.findUserProfileByJwt(jwt);
         Wallet receiverWallet = walletService.findWalletById(walletId);
 
-        Wallet wallet = walletService.wallettoWalletTransfer(
+        Wallet wallet = walletService.walletToWalletTransfer(
                     senderUser, receiverWallet, 
                     req.getAmount());
+        
+        transactionService.createTransaction(wallet, 
+            WalletTransactionType.WALLET_TRANSFER, 
+            receiverWallet.getId(), 
+            req.getPurpose(), 
+            req.getAmount());
 
         return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
     }
@@ -79,6 +91,10 @@ public class WalletController {
         PaymentOrder order = paymentService.getPaymentOrderById(orderId);
 
         Boolean status = paymentService.proccedPaymentOrder(order, paymentId);
+
+        if(wallet.getBalance() == null){
+            wallet.setBalance(BigDecimal.valueOf(0));
+        }
 
         if(status){
             wallet = walletService.addBalance(wallet, order.getAmount());
